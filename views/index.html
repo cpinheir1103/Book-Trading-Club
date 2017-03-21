@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Book Trading Club</title>
+    <meta name="description" content="A cool thing made with Glitch">
+    <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"
+            integrity="sha256-gvQgAFzTH6trSrAWoH1iPo9Xc96QxSZ3feW6kem+O00="
+            crossorigin="anonymous"></script>
+    <script>
+      var authuser = '<%= authuser %>';
+      var authcity = '<%= authcity %>';
+            
+      function refreshGoingData() {
+        // refresh 'going' data.
+        $.ajax({
+          dataType: "json",
+          url: "/getGoingData",
+          success: dataReadyGoing
+        });
+      }
+      
+      function removeIllegalChars(str) {        
+        return str.replace(/\W/g, '');
+      }
+      
+      function removeNonNumeric(str) {
+        return str.replace(/\D/g,'');
+      }
+      
+      function going(title) {
+        // now post to node server
+        $.ajax({
+          url: '/going', 
+          type: 'POST', 
+          contentType: 'application/json', 
+          data: JSON.stringify({"title": title})
+          //,
+          //success: refreshPage() 
+        })
+        
+        // refresh 'going' data after a sec.
+        setTimeout(refreshGoingData, 1000);
+      }
+      
+      function dataReadyGoing(data) {
+        console.log("data = " + JSON.stringify(data)); 
+        //start out by zeroing all button text.
+        $(".going").text("0 GOING");
+        
+        var str = "";
+        var len = data.length;
+        for (var i=0; i<len; i++) {
+          var title = removeIllegalChars(data[i].name);
+          //console.log("title=" + title);
+          var bVal = $("." + title).text();           
+          //console.log("bval=" + bVal);
+          var numstr = removeNonNumeric(bVal);
+          var cnt = Number(numstr) + 1;
+          //console.log("cnt=" + cnt);
+          $("." + title).text(cnt + " GOING")
+        }
+      }
+      
+      function dataReady(data) {
+        
+        // this is the event data. display this first. 
+        var str = "";
+        var len = data.length;
+        console.log("data = " + JSON.stringify(data));
+        var imgURL = data.items[0].volumeInfo.imageLinks.smallThumbnail;
+        console.log("thmbURL = " + imgURL); 
+        
+        str += '<img src= "' + imgURL + '"></img>';
+         $(".status").html(str);
+       
+        /*
+        for (var i=0; i<len; i++) {          
+          var title = data.events.event[i].title;
+          var desc = data.events.event[i].description;
+          if (desc === null)
+            desc = "No description available";
+          else
+            desc = desc.substring(0,300);
+          if (authuser !== "")
+            str += "<button class='going " + removeIllegalChars(title) + "' onclick='going(\"" + title + "\")' >0 GOING</button>"
+          str += "<span>" + data.events.event[i].start_time + " " + title + "</span>";
+          str += "<p>" + desc + "</p>";
+        }
+        //console.log("str = " + JSON.stringify(str));       
+        $(".status").html(str);
+        
+        // now that the event data has been rendered, we need to query database for 'going' data
+        $.ajax({
+            dataType: "json",
+            url: "/getGoingData",
+            success: dataReadyGoing
+          });
+       */
+      }
+      
+      $(document).ready(function() {
+        
+        
+        myHeader();         
+        
+        $("#submit").click(function() {
+          var username = $("#username").val();        
+          var password = $("#password").val();
+          console.log("username = " + username);
+          
+          var searchcity = $("#stext").val();
+          var url = "https://www.googleapis.com/books/v1/volumes?q=title:" + searchcity;
+          
+          //$.getJSON(url dataReady);
+          
+          $.ajax({
+            dataType: "jsonp",
+            url: url,
+            success: dataReady
+          });
+          
+          
+        });
+      });
+      
+    </script>
+  </head>
+  <body>
+    <header class="myhdr">
+    </header>
+    <div id="mainform">   
+      <!-- Required Div Starts Here -->
+      <form id="form">
+        <input type="button" id="submit" value="Search"/>
+        <input type="text" id="stext" value='<%= authcity %>'/>
+      </form>
+    </div>
+    <div class="status">      
+    </div>
+    <script src="/client.js"></script>    
+  </body>
+</html>

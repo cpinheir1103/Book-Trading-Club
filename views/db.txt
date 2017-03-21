@@ -1,0 +1,23 @@
+eventful API 
+fcc nightlife app
+    for freecodecamp.com student project
+    Key: qkZtngr4pg4jdrzb
+////////////////////example:///////////////////////////////
+https://api.eventful.com/json/events/search?app_key=qkZtngr4pg4jdrzb&keywords=concert&location=phoenix&date=today
+/////////////////////////////////////////////////
+
+table books
+
+ID  picURL  owner
+
+
+
+table requests
+
+ID   bookID   reqBy  approved
+
+
+
+table users
+
+ID  username  password  email  name  city  state
