@@ -3,6 +3,7 @@
     if (authuser !== "") {
       str += "<a href=\"index\">All Books:</a><span>&#32;</span>";
       str += "<a href=\"mybooks\">My Books:</a><span>&#32;</span>";
+      str += "<a href=\"myrequests\">My Requests:</a><span>&#32;</span>";
       str += "<a href=\"myacct\">My Acct:</a><span>&#32;</span>";
       str += "<a href=\"logout\">Logout:" + authuser + "</a><span>&#32;</span>";
     }

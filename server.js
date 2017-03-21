@@ -179,8 +179,19 @@ app.get('/mybooks', function(req, res) {
         authuser: req.session.authuser
       });
    }
-  
-  //res.sendFile(__dirname + '/views/newpoll.html');
+});
+
+app.get('/myrequests', function(req, res) {
+   if (req.session.authuser === undefined) {
+     res.render('/', {   
+       authuser: req.session.authuser
+     });
+   }
+   else {
+      res.render('myrequests', {   
+        authuser: req.session.authuser
+      });
+   }
 });
 
 
