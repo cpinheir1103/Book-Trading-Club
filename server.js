@@ -143,10 +143,25 @@ function getAllBookRecs(req, res) {
 
 function getMyBookRecs(req, res) {
   var retArr = [];
-  console.log("in getAllBookRecs ()");
+  console.log("in getMyBookRecs ()");
   db.each("SELECT * FROM books where owner = '" + req.session.authuser + "'", function(err, row) { 
       retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner  });
       console.log(row.ID + ": " + row.picURL);
+    },
+      function complete(err, found) {
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(retArr)); 
+        res.end();
+  });
+}
+
+
+function getMyRequestRecs(req, res) {
+  var retArr = [];
+  console.log("in getMyRequestRecs ()");
+  db.each("SELECT * FROM books INNER JOIN requests ON books.ID = requests.bookID where reqBy = '" + req.session.authuser + "'", function(err, row) { 
+      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner, "approved": row.approved  });
+      console.log("row=" + JSON.stringify(row));
     },
       function complete(err, found) {
         res.writeHead(200, {"Content-Type": "application/json"});
@@ -205,6 +220,10 @@ app.get('/myrequests', function(req, res) {
    }
 });
 
+
+app.get('/getMyRequests', function(req, res) {
+  getMyRequestRecs(req, res);
+});
 
 app.get('/getMyBooks', function(req, res) {
   getMyBookRecs(req, res);
