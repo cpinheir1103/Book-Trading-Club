@@ -3,6 +3,26 @@ canvas {
   max-width: 800px
 }
 
+.book {
+  border: 1px solid darkblue;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 5px;
+  float:left;
+}
+
 .fl {
   float:left;
+}
+
+.status {
+  display:block;
+  float:left;
+  clear: left;
+}
+
+.mybooks {
+  display:block;
+  float:left;
+  clear: left;
 }

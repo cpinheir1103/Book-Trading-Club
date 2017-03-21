@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Nitelife App</title>
+    <title>Book Trading Club</title>
     <meta name="description" content="A cool thing made with Glitch">
     <link id="favicon" rel="icon" href="https://glitch.com/edit/favicon-app.ico" type="image/x-icon">
     <meta charset="utf-8">
@@ -29,9 +29,12 @@
         myHeader();         
         
         $("#submit").click(function() {
-          var username = $("#username").val();        
+          var username = $("#username").val();       
           var password = $("#password").val();
+          var name = $("#name").val();
+          var email = $("#email").val();
           var city = $("#city").val();
+          var state = $("#state").val();
           console.log("username = " + username);
           
           // now post to node server
@@ -39,7 +42,7 @@
               url: '/procregister', 
               type: 'POST', 
               contentType: 'application/json', 
-              data: JSON.stringify({"username":username, "password":password, "city":city}),
+              data: JSON.stringify({"username":username, "password":password, "city":city, "name":name, "email":email, "state":state }),
               success:  function () { setTimeout(function () { registerSuccess(); }, 1000) },
               error: function (json) { 
                 console.log("json.status=" + json.status);
@@ -62,10 +65,16 @@
         <p id="returnmessage"></p>
         <label>Username: <span>*</span></label>
         <input type="text" id="username" placeholder="Username"/><br/>
-        <label>City: <span>*</span></label>
-        <input type="text" id="city" placeholder="City"/><br/>
         <label>Password:</label>
-        <input type="password" id="password" placeholder="Password"/><br/>  
+        <input type="password" id="password" placeholder="Password"/><br/> 
+        <label>Name: <span>*</span></label>
+        <input type="text" id="name" placeholder="Name"/><br/>
+        <label>E-Mail:</label>
+        <input type="text" id="email" placeholder="E-mail"/><br/>
+        <label>City:</label>
+        <input type="text" id="city" placeholder="City"/><br/>
+        <label>State:</label>
+        <input type="text" id="state" placeholder="State"/><br/>         
         <input type="button" id="submit" value="Register"/>
       </form>
     </div>

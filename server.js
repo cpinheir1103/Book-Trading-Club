@@ -21,15 +21,16 @@ app.set('view engine', 'html');
 
 
 
-////// DATABASE ////////////////////////////////////////////////////////
+////// DATABASE /////////////////////////////////////////////////////////
 if (false) {
   db.serialize(function() {
     //db.run("DROP TABLE events");
     //db.run("DROP TABLE users");
-    console.log("DROPPING TABLE!");
-    //db.run("CREATE TABLE events ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, name TEXT, owner TEXT)");
-    //db.run("CREATE TABLE users ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username TEXT, password TEXT, city TEXT)");  
-    console.log("CREATING TABLE!");
+    //console.log("DROPPING TABLE!");
+    //db.run("CREATE TABLE books ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, picURL TEXT, owner INTEGER)");
+    //db.run("CREATE TABLE requests ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, bookID INTEGER, reqBy INTEGER, approved INTEGER)");
+    //db.run("CREATE TABLE users ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username TEXT, password TEXT, email TEXT, name TEXT, city TEXT, state TEXT)");  
+    //console.log("CREATING TABLE!");
   });
 }
 
@@ -41,8 +42,8 @@ if (false) {
 
 function procRegister(rb) {
   db.serialize(function() {
-    var stmt = db.prepare("INSERT INTO users(username, password, city) VALUES(?,?,?)");
-    stmt.run(rb.username, rb.password, rb.city);  
+    var stmt = db.prepare("INSERT INTO users(username, password, city, name, email, state) VALUES(?,?,?,?,?,?)");
+    stmt.run(rb.username, rb.password, rb.city, rb.name, rb.email, rb.state);  
     stmt.finalize();
   });
    
@@ -96,28 +97,15 @@ function delEventRec(req, res) {
   showTable("events");
 }
 
-function procGoing(req, res) {  
-  var rb = req.body;
-  var eventFound = false;
-  console.log("in procGoing()");
-  // if event exists for authuser, delete it....otherwise add it. 
-  db.serialize(function() {       
-    db.each("SELECT name FROM events where name ='" + rb.title + "'", function(err, row) { 
-      console.log("procgoing: " + row.ID + ": " + row.name);
-      eventFound = true;
-    },
-      function complete(err, found) {
-        console.log("select complete.");
-        if (eventFound) {  // found, so delete it.
-          delEventRec(req, res);
-        }
-        else { // not found, so add it.
-          newEventRec(req,res);
-        }
-    });
-  });    
+function procNewBook(req, res) {  
+  console.log("newEventRec");
+  db.serialize(function() {
+    var stmt = db.prepare("INSERT INTO books(picURL, owner) VALUES(?,?)");
+    stmt.run(req.body.picURL, req.session.authuser);
+    stmt.finalize();
+  });
   
-  //showTable("events");
+  showTable("books");  
 }
 
 function showTable(tbl) {
@@ -128,12 +116,12 @@ function showTable(tbl) {
   });
 }
 
-function getAllEventRecs(req, res) {
+function getAllBookRecs(req, res) {
   var retArr = [];
-  console.log("in getAllEventRecs ()");
-  db.each("SELECT * FROM events", function(err, row) { 
-      retArr.push({ "name": row.name, "owner": row.owner  });
-      console.log(row.ID + ": " + row.name);
+  console.log("in getAllBookRecs ()");
+  db.each("SELECT * FROM books", function(err, row) { 
+      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner  });
+      console.log(row.ID + ": " + row.picURL);
     },
       function complete(err, found) {
         res.writeHead(200, {"Content-Type": "application/json"});
@@ -142,7 +130,19 @@ function getAllEventRecs(req, res) {
   });
 }
 
-
+function getMyBookRecs(req, res) {
+  var retArr = [];
+  console.log("in getAllBookRecs ()");
+  db.each("SELECT * FROM books where owner = '" + req.session.authuser + "'", function(err, row) { 
+      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner  });
+      console.log(row.ID + ": " + row.picURL);
+    },
+      function complete(err, found) {
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(retArr)); 
+        res.end();
+  });
+}
 
 ////// ROUTING ///////////////////////////////////////////////////////////////////
 
@@ -155,24 +155,27 @@ app.use(expressSession({secret: 'viush78474hffhs4'}));
 app.get("/", function (req, res) {
   //req.session.authuser = undefined;          // temporarily hardcode no logged in user. 
   //req.session.authuser = "cpinheir";  // temporarily hardcode a logged in user. 
-  console.log("req.session.authuser=" + req.session.authuser);
+  console.log("index req.session.authuser=" + req.session.authuser);
   
   //res.redirect('/listpolls');
   
   res.render('index', {   
-        authuser: req.session.authuser,
-        authcity: req.session.authcity
+        authuser: req.session.authuser
       });
 });
 
-app.get('/list', function(req, res) {
+app.get("/index", function (req, res) {
+  res.redirect('/');
+});
+
+app.get('/mybooks', function(req, res) {
    if (req.session.authuser === undefined) {
      res.render('/', {   
        authuser: req.session.authuser
      });
    }
    else {
-      res.render('list', {   
+      res.render('mybooks', {   
         authuser: req.session.authuser
       });
    }
@@ -180,15 +183,20 @@ app.get('/list', function(req, res) {
   //res.sendFile(__dirname + '/views/newpoll.html');
 });
 
-app.get('/getGoingData', function(req, res) {
-  getAllEventRecs(req, res);
+
+app.get('/getMyBooks', function(req, res) {
+  getMyBookRecs(req, res);
+});
+
+app.get('/getAllBooks', function(req, res) {
+  getAllBookRecs(req, res);
 });
 
 
-app.post('/going', function(req,res){
+app.post('/newbook', function(req,res){
     console.log(req.body);
-    console.log("title=" + req.body.title);
-    procGoing(req, res);    
+    console.log("picURL=" + req.body.picURL);
+    procNewBook(req, res);    
 });
 
 app.post('/procregister', function(req,res){

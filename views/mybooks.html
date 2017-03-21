@@ -14,7 +14,7 @@
     <script>
       var authuser = '<%= authuser %>';
             
-      function refreshGoingData() {
+      function refreshBookData() {
         // refresh 'going' data.
         $.ajax({
           dataType: "json",
@@ -31,42 +31,22 @@
         return str.replace(/\D/g,'');
       }
       
-      function going(title) {
+      function newBook(picURL) {
         // now post to node server
         $.ajax({
-          url: '/going', 
+          url: '/newbook', 
           type: 'POST', 
           contentType: 'application/json', 
-          data: JSON.stringify({"title": title})
+          data: JSON.stringify({"picURL": picURL})
           //,
           //success: refreshPage() 
         })
         
         // refresh 'going' data after a sec.
-        setTimeout(refreshGoingData, 1000);
+        //setTimeout(refreshBookData, 1000);
       }
       
-      function dataReadyGoing(data) {
-        console.log("data = " + JSON.stringify(data)); 
-        //start out by zeroing all button text.
-        $(".going").text("0 GOING");
-        
-        var str = "";
-        var len = data.length;
-        for (var i=0; i<len; i++) {
-          var title = removeIllegalChars(data[i].name);
-          //console.log("title=" + title);
-          var bVal = $("." + title).text();           
-          //console.log("bval=" + bVal);
-          var numstr = removeNonNumeric(bVal);
-          var cnt = Number(numstr) + 1;
-          //console.log("cnt=" + cnt);
-          $("." + title).text(cnt + " GOING")
-        }
-      }
-      
-      function dataReady(data) {
-        
+      function dataMyBooksReady(data) {
         // this is the event data. display this first. 
         var str = "";
         var len = data.length;
@@ -81,32 +61,45 @@
                
         for (var i=0; i<len; i++) {          
           var picURL = data[i].picURL;
-          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div><button>Request Trade</button></div></div>';          
+          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div></div></div>';          
         }
         //console.log("str = " + JSON.stringify(str));       
-        $(".status").html(str);
-        
-       
+        $(".mybooks").html(str);
       }
       
-      $(document).ready(function() {       
+      function dataReady(data) {
         
-        myHeader();     
+        // this is the event data. display this first. 
+        var str = "";
+        var len = data.length;
+        console.log("data = " + JSON.stringify(data));
+        var imgURL = data.items[0].volumeInfo.imageLinks.smallThumbnail;
+        console.log("thmbURL = " + imgURL); 
+        
+        newBook(imgURL);
+        
+        str += '<img src= "' + imgURL + '"></img>';
+         $(".status").html(str);
+        
+      }
+      
+      $(document).ready(function() {
+                
+        myHeader();        
         
         $.ajax({
-            dataType: "json",
-            url: "/getAllBooks",
-            success: dataReady
-          });
-        
+          dataType: "json",
+          url: "/getMyBooks",
+          success: dataMyBooksReady
+        });
         
         $("#submit").click(function() {
           var username = $("#username").val();        
           var password = $("#password").val();
           console.log("username = " + username);
           
-          var searchcity = $("#stext").val();
-          var url = "https://www.googleapis.com/books/v1/volumes?q=title:" + searchcity;
+          var searchterm = $("#stext").val();
+          var url = "https://www.googleapis.com/books/v1/volumes?q=title:" + searchterm;
           
           //$.getJSON(url dataReady);
           
@@ -126,9 +119,18 @@
     <header class="myhdr">
     </header>
     <h1>
-      All Books:
+      My Books:
     </h1>
-    <div class="status">      
+    <div id="mainform">   
+      <!-- Required Div Starts Here -->
+      <form id="form">
+        <input type="button" id="submit" value="Search"/>
+        <input type="text" id="stext" value=""/>
+      </form>
+    </div>
+    <div class="status">  
+    </div>
+    <div class="mybooks">      
     </div>
     <script src="/client.js"></script>    
   </body>
