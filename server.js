@@ -155,6 +155,19 @@ function getMyBookRecs(req, res) {
   });
 }
 
+function getRequestForMeRecs(req, res) {
+  var retArr = [];
+  console.log("in getRequestForMeRecs ()");
+  db.each("SELECT * FROM books INNER JOIN requests ON books.ID = requests.bookID where owner = '" + req.session.authuser + "'", function(err, row) { 
+      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner, "approved": row.approved  });
+      console.log("row=" + JSON.stringify(row));
+    },
+      function complete(err, found) {
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(retArr)); 
+        res.end();
+  });
+}
 
 function getMyRequestRecs(req, res) {
   var retArr = [];
@@ -220,6 +233,9 @@ app.get('/myrequests', function(req, res) {
    }
 });
 
+app.get('/getRequestsForMe', function(req, res) {
+  getRequestForMeRecs(req, res);
+});
 
 app.get('/getMyRequests', function(req, res) {
   getMyRequestRecs(req, res);
