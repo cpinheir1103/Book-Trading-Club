@@ -65,6 +65,22 @@
         }
       }
       
+      function requestBook(id) {
+        console.log("request ID=" + id);
+        
+        // now post to node server
+        $.ajax({
+          url: '/requestbook', 
+          type: 'POST', 
+          contentType: 'application/json', 
+          data: JSON.stringify({"id": id})
+          //,
+          //success: refreshPage() 
+        })
+        
+      }
+    
+      
       function dataReady(data) {
         
         // this is the event data. display this first. 
@@ -81,7 +97,10 @@
                
         for (var i=0; i<len; i++) {          
           var picURL = data[i].picURL;
-          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div><button>Request Trade</button></div></div>';          
+          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img>';
+          if (authuser !== "")
+            str += '<div><button id="' + data[i].ID + '" onclick="requestBook(' + data[i].ID + ')" >Request Trade</button></div>';
+          str += '</div>';                  
         }
         //console.log("str = " + JSON.stringify(str));       
         $(".status").html(str);

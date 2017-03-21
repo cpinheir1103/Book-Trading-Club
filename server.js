@@ -98,7 +98,7 @@ function delEventRec(req, res) {
 }
 
 function procNewBook(req, res) {  
-  console.log("newEventRec");
+  console.log("procNewBook");
   db.serialize(function() {
     var stmt = db.prepare("INSERT INTO books(picURL, owner) VALUES(?,?)");
     stmt.run(req.body.picURL, req.session.authuser);
@@ -106,6 +106,17 @@ function procNewBook(req, res) {
   });
   
   showTable("books");  
+}
+  
+function procReqBook(req, res) {  
+  console.log("procReqBook");
+  db.serialize(function() {
+    var stmt = db.prepare("INSERT INTO requests(bookID, reqBy, approved) VALUES(?,?,?)");
+    stmt.run(req.body.id, req.session.authuser, 0);
+    stmt.finalize();
+  });
+  
+  showTable("requests");  
 }
 
 function showTable(tbl) {
@@ -207,7 +218,13 @@ app.get('/getAllBooks', function(req, res) {
 app.post('/newbook', function(req,res){
     console.log(req.body);
     console.log("picURL=" + req.body.picURL);
-    procNewBook(req, res);    
+    procNewBook(req, res);   
+});
+
+app.post('/requestbook', function(req,res){
+    console.log(req.body);
+    console.log("id=" + req.body.id);
+    procReqBook(req, res);   
 });
 
 app.post('/procregister', function(req,res){

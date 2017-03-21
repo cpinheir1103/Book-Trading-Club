@@ -8,6 +8,7 @@
       str += "<a href=\"logout\">Logout:" + authuser + "</a><span>&#32;</span>";
     }
    else {
+      str += "<a href=\"index\">All Books:</a><span>&#32;</span>";
       str += "<a href=\"login\">Login</a><span>&#32;</span>";
       str += "<a href=\"register\">Register</a><span>&#32;</span>";     
    }
