@@ -14,12 +14,11 @@
     <script>
       var authuser = '<%= authuser %>';
             
-      function refreshBookData() {
-        // refresh 'going' data.
+      function refreshReqForMeBookData() {
         $.ajax({
           dataType: "json",
-          url: "/getGoingData",
-          success: dataReadyGoing
+          url: "/getRequestsForMe",
+          success: dataReqForMeReady
         });
       }
       
@@ -45,6 +44,21 @@
         // refresh 'going' data after a sec.
         //setTimeout(refreshBookData, 1000);
       }
+      
+      function approveReq(id) {
+        // now post to node server
+        $.ajax({
+          url: '/approvereq', 
+          type: 'POST', 
+          contentType: 'application/json', 
+          data: JSON.stringify({"id": id})
+          //,
+          //success: refreshPage() 
+        })
+        
+        // refresh 'going' data after a sec.
+        setTimeout(refreshReqForMeBookData, 1000);
+      }
             
       function dataReqForMeReady(data) {
         // this is the event data. display this first. 
@@ -61,7 +75,14 @@
                
         for (var i=0; i<len; i++) {          
           var picURL = data[i].picURL;
-          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div></div></div>';          
+          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div></div>';  
+          if (data[i].approved === 0)
+            str += '<div><button id="' + data[i].ID + '" onclick="approveReq(' + data[i].ID + ')" >Accept Trade</button></div>';           
+          else
+            str += '<p>Approved</p></div>';
+          str += '</div>'; 
+            
+            
         }
         //console.log("str = " + JSON.stringify(str));       
         $(".status").html(str);
@@ -82,7 +103,13 @@
                
         for (var i=0; i<len; i++) {          
           var picURL = data[i].picURL;
-          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div></div></div>';          
+          var apprvStr;
+          if (data[i].approved)
+            apprvStr = "Approved";
+          else
+            apprvStr = "Pending";
+          str += '<div class="book" ><img src= "' + picURL + '" height="180" width="125"></img><div></div>';
+          str += '<p>' + apprvStr + '</p></div>';          
         }
         //console.log("str = " + JSON.stringify(str));       
         $(".mybooks").html(str);

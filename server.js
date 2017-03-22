@@ -119,6 +119,17 @@ function procReqBook(req, res) {
   showTable("requests");  
 }
 
+function procApproveReq(req, res) {  
+  console.log("procApproveReq");
+  db.serialize(function() {
+    var stmt = db.prepare("UPDATE requests SET approved = 1 WHERE ID = " + req.body.id);
+    stmt.run();
+    stmt.finalize();
+  });
+
+  showTable("requests");  
+}
+
 function showTable(tbl) {
   db.serialize(function(url) {
     db.each("SELECT * FROM " + tbl, function(err, row) {
@@ -159,7 +170,7 @@ function getRequestForMeRecs(req, res) {
   var retArr = [];
   console.log("in getRequestForMeRecs ()");
   db.each("SELECT * FROM books INNER JOIN requests ON books.ID = requests.bookID where owner = '" + req.session.authuser + "'", function(err, row) { 
-      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner, "approved": row.approved  });
+      retArr.push({ "ID": row.ID, "picURL": row.picURL, "owner": row.owner, "approved": row.approved, "bookID": row.bookID  });
       console.log("row=" + JSON.stringify(row));
     },
       function complete(err, found) {
@@ -167,6 +178,7 @@ function getRequestForMeRecs(req, res) {
         res.write(JSON.stringify(retArr)); 
         res.end();
   });
+  
 }
 
 function getMyRequestRecs(req, res) {
@@ -254,6 +266,12 @@ app.post('/newbook', function(req,res){
     console.log(req.body);
     console.log("picURL=" + req.body.picURL);
     procNewBook(req, res);   
+});
+
+app.post('/approvereq', function(req,res){
+    console.log(req.body);
+    console.log("id=" + req.body.id);
+    procApproveReq(req, res);   
 });
 
 app.post('/requestbook', function(req,res){

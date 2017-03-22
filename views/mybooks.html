@@ -15,11 +15,10 @@
       var authuser = '<%= authuser %>';
             
       function refreshBookData() {
-        // refresh 'going' data.
         $.ajax({
           dataType: "json",
-          url: "/getGoingData",
-          success: dataReadyGoing
+          url: "/getMyBooks",
+          success: dataMyBooksReady
         });
       }
       
@@ -43,7 +42,7 @@
         })
         
         // refresh 'going' data after a sec.
-        //setTimeout(refreshBookData, 1000);
+        setTimeout(refreshBookData, 1000);
       }
       
       function dataMyBooksReady(data) {
@@ -124,7 +123,7 @@
     <div id="mainform">   
       <!-- Required Div Starts Here -->
       <form id="form">
-        <input type="button" id="submit" value="Search"/>
+        <input type="button" id="submit" value="Add Title"/>
         <input type="text" id="stext" value=""/>
       </form>
     </div>
