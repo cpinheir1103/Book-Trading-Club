@@ -24,7 +24,8 @@ app.set('view engine', 'html');
 ////// DATABASE /////////////////////////////////////////////////////////
 if (false) {
   db.serialize(function() {
-    //db.run("DROP TABLE events");
+    //db.run("DROP TABLE books");
+    //db.run("DROP TABLE requests");
     //db.run("DROP TABLE users");
     //console.log("DROPPING TABLE!");
     //db.run("CREATE TABLE books ( ID	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, picURL TEXT, owner INTEGER)");
