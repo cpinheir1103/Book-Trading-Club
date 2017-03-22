@@ -40,6 +40,17 @@ if (false) {
   });
 }
 
+
+function saveAcctInfo(rb) {
+  db.serialize(function() {
+    var stmt = db.prepare("UPDATE users SET password = ?, city = ?, name = ?, email = ?, state = ? WHERE username = '" + rb.username + "'");
+    stmt.run(rb.password, rb.city, rb.name, rb.email, rb.state);  
+    stmt.finalize();
+  });
+   
+  showTable("users");
+}
+
 function procRegister(rb) {
   db.serialize(function() {
     var stmt = db.prepare("INSERT INTO users(username, password, city, name, email, state) VALUES(?,?,?,?,?,?)");
@@ -135,6 +146,20 @@ function showTable(tbl) {
     db.each("SELECT * FROM " + tbl, function(err, row) {
       console.log(row);
     });
+  });
+}
+
+function getMyAcctRec(req, res) {
+  var retArr = [];
+  console.log("in getMyAcctRec ()");
+  db.each("SELECT * FROM users where username = '" + req.session.authuser + "'", function(err, row) { 
+      retArr.push({ "ID": row.ID, "username": row.username, "password": row.password, "email": row.email, "name": row.name, "city": row.city, "state": row.state  });
+      console.log("row=" + JSON.stringify(row));
+    },
+      function complete(err, found) {
+        res.writeHead(200, {"Content-Type": "application/json"});
+        res.write(JSON.stringify(retArr)); 
+        res.end();
   });
 }
 
@@ -261,6 +286,9 @@ app.get('/getAllBooks', function(req, res) {
   getAllBookRecs(req, res);
 });
 
+app.get('/getmyacct', function(req, res) {
+  getMyAcctRec(req, res);
+});
 
 app.post('/newbook', function(req,res){
     console.log(req.body);
@@ -280,6 +308,13 @@ app.post('/requestbook', function(req,res){
     procReqBook(req, res);   
 });
 
+app.post('/saveacct', function(req,res){
+    console.log(req.body);
+    console.log("username=" + req.body.username);
+    saveAcctInfo(req.body);    
+    res.end('{"success" : "Updated Successfully", "status" : 200}');
+});
+
 app.post('/procregister', function(req,res){
     console.log(req.body);
     console.log("username=" + req.body.username);
@@ -293,6 +328,11 @@ app.post('/proclogin', function(req,res){
     procLogin(req, res);    
 });
 
+app.get('/myacct', function(req, res) { 
+  res.render('myacct', {   
+    authuser: req.session.authuser
+  });
+})
 
 app.get('/register', function(req, res) { 
   res.render('register', {   
